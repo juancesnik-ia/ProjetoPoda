@@ -1,9 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8"><!DOCTYPE html>
-<html lang="pt-BR">
-<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>App Fiscalização de Poda de Árvore</title>
@@ -17,20 +14,18 @@
     -->
     
     <!-- 
-      PLANO DA ESTRUTURA DO APLICATIVO:
-      A aplicação é uma SPA (Single-Page Application) que simula múltiplas telas usando lógica de JavaScript para mostrar/esconder seções de HTML.
-      As telas são: Login, Cadastro, Recuperar Senha, Painel Principal, Formulário de Nova Solicitação, Lista de Solicitações e Detalhe da Solicitação.
-      Essa estrutura foi escolhida para simplificar drasticamente o fluxo confuso do site atual da prefeitura, oferecendo ao usuário ações claras e diretas,
-      e um formulário otimizado, atendendo a todos os requisitos da documentação inicial (login, solicitação, anexo de fotos e feedback de status).
+      PLANO DA ESTRUTURA DO APLICATIVO (VERSÃO 2):
+      A aplicação é uma SPA (Single-Page Application). As telas agora incluem: Login, Cadastro, Recuperar Senha, Painel Principal, Meus Dados (NOVO), 
+      Formulário de Nova Solicitação, Lista de Solicitações e Detalhe da Solicitação (com Linha do Tempo - NOVO).
+      A estrutura foi aprimorada para incluir gerenciamento de perfil de usuário e um acompanhamento de processos mais detalhado, tornando a experiência mais completa.
     -->
     
     <!-- 
       ESCOLHAS DE VISUALIZAÇÃO E CONTEÚDO:
-      - Processo de Login/Cadastro: Apresentado através de formulários limpos para facilitar o acesso e o registro de novos usuários.
-      - Tipos de Solicitação (Poda/Fiscalização): Organizados em um painel com botões grandes e claros para simplificar a escolha da ação pelo usuário.
-      - Formulário de Solicitação: Estruturado em HTML para coletar os dados necessários de forma intuitiva, incluindo um campo para upload de arquivos.
-      - Status das Solicitações: Exibido em uma lista dinâmica com etiquetas coloridas e filtros para informar e organizar os dados para o usuário.
-      Todos os ícones são implementados com caracteres Unicode para manter a performance e a simplicidade, sem usar imagens ou SVG.
+      - Gerenciamento de Perfil: Uma nova tela permite que o usuário visualize e edite seus dados cadastrais.
+      - Linha do Tempo: A tela de detalhes foi transformada em uma linha do tempo vertical, usando HTML e CSS para mostrar o histórico de cada solicitação de forma clara e cronológica.
+      - Login Gov.br: A funcionalidade do botão foi aprimorada para simular uma autenticação real, melhorando o realismo do protótipo.
+      - Filtros e Notificações: Mantidos e aprimorados para uma melhor usabilidade.
     -->
     
     <!-- CONFIRMAÇÃO: Nenhum gráfico SVG ou a biblioteca Mermaid.js foram utilizados. -->
@@ -42,35 +37,42 @@
 
         /* Estilo base para as etiquetas (badges) de status das solicitações */
         .etiqueta-status {
-            padding: 0.25rem 0.75rem;
-            border-radius: 9999px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
+            padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem;
+            font-weight: 600; text-transform: uppercase;
         }
 
         /* Cores específicas para cada status */
-        .status-em-analise { background-color: #f59e0b; color: white; }
+        .status-em-analise, .status-em-análise { background-color: #f59e0b; color: white; }
         .status-aprovado { background-color: #10b981; color: white; }
         .status-recusado { background-color: #ef4444; color: white; }
+        .status-criado { background-color: #3b82f6; color: white; }
 
-        /* MELHORIA: Estilos para o sistema de notificação (toast) */
+        /* Estilos para o sistema de notificação (toast) */
         .notificacao-toast {
-            position: fixed;
-            bottom: -100px; /* Começa fora da tela */
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 1rem 1.5rem;
-            border-radius: 0.5rem;
-            color: white;
-            font-weight: 500;
+            position: fixed; bottom: -100px; left: 50%;
+            transform: translateX(-50%); padding: 1rem 1.5rem;
+            border-radius: 0.5rem; color: white; font-weight: 500;
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            transition: bottom 0.5s ease-in-out; /* Animação suave */
-            z-index: 100;
+            transition: bottom 0.5s ease-in-out; z-index: 100;
         }
         .notificacao-toast.sucesso { background-color: #22c55e; }
         .notificacao-toast.erro { background-color: #ef4444; }
-        .notificacao-toast.mostrar { bottom: 20px; } /* Posição final na tela */
+        .notificacao-toast.info { background-color: #3b82f6; }
+        .notificacao-toast.mostrar { bottom: 20px; }
+
+        /* NOVO: Estilos para a Linha do Tempo */
+        .timeline { position: relative; padding-left: 2.5rem; }
+        .timeline::before {
+            content: ''; position: absolute; left: 0.5rem; top: 0;
+            bottom: 0; width: 2px; background-color: #e2e8f0;
+        }
+        .timeline-item { position: relative; margin-bottom: 1.5rem; }
+        .timeline-item:last-child { margin-bottom: 0; }
+        .timeline-dot {
+            position: absolute; left: -2.0rem; top: 0.25rem;
+            height: 1rem; width: 1rem; border-radius: 9999px;
+            border: 2px solid white;
+        }
     </style>
 </head>
 <body class="bg-gradient-to-br from-emerald-50 to-slate-100 font-sans text-slate-800">
@@ -96,7 +98,6 @@
                     <div>
                         <div class="flex justify-between">
                             <label for="senha-login" class="block text-sm font-medium text-slate-600">Senha</label>
-                            <!-- MELHORIA: Adicionado link para a tela de recuperar senha -->
                             <a href="#" onclick="event.preventDefault(); mostrarTela('tela-recuperar-senha')" class="text-sm font-medium text-emerald-600 hover:underline">Esqueci a senha</a>
                         </div>
                         <div class="relative mt-1">
@@ -110,7 +111,10 @@
                     <div class="relative flex py-3 items-center">
                         <div class="flex-grow border-t border-slate-200"></div><span class="flex-shrink mx-4 text-slate-400 text-sm">OU</span><div class="flex-grow border-t border-slate-200"></div>
                     </div>
-                    <button onclick="efetuarLogin()" class="w-full bg-blue-600 text-white py-2.5 px-4 rounded-md hover:bg-blue-700 font-bold">Entrar com gov.br</button>
+                    <!-- Botão Gov.br agora chama uma função específica -->
+                    <button onclick="loginGovBr()" class="w-full bg-blue-600 text-white py-2.5 px-4 rounded-md hover:bg-blue-700 font-bold flex items-center justify-center gap-2">
+                        <img src="https://logodownload.org/wp-content/uploads/2021/01/gov-br-logo-1.png" class="h-6" alt="Logo Gov.br"/> Entrar com gov.br
+                    </button>
                 </div>
             </main>
             <footer class="text-center mt-6">
@@ -123,7 +127,7 @@
         <!-- ====================================================================== -->
         <section id="tela-cadastro" class="tela w-full max-w-lg mx-auto flex-col items-center justify-center">
             <header class="text-center mb-8">
-                <img src="https://www.riopreto.sp.gov.br/wp-content/uploads/2022/01/brasao-colorido-e-texto-prefeitura-SJRP-2021.png" alt="Logo Prefeitura de São José do Rio Preto" class="h-24 mx-auto mb-4">
+                <img src="https://www.riopreto.sp.gov.br/wp-content/uploads/2022/01/brasao-colorido-e-texto-prefeitura-SJRP-2021.png" alt="Logo Prefeitura" class="h-24 mx-auto mb-4">
                 <h1 class="text-3xl font-bold text-slate-700">Criar Conta</h1>
                 <p class="text-slate-500">Preencha os dados para se cadastrar</p>
             </header>
@@ -138,14 +142,12 @@
                         <label for="cadastro-cpf" class="block text-sm font-medium text-slate-600">CPF / CNPJ</label>
                         <input type="text" id="cadastro-cpf" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm" placeholder="000.000.000-00" required>
                     </div>
-
                     <h3 class="text-lg font-semibold text-slate-700 border-b pb-2 pt-4">Endereço</h3>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
                         <div class="md:col-span-1">
                             <label for="cadastro-cep" class="block text-sm font-medium text-slate-600">CEP</label>
                             <input type="text" id="cadastro-cep" placeholder="15000-000" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm" required>
                         </div>
-                        <!-- MELHORIA: Botão para simular a busca de CEP -->
                         <div class="md:col-span-2">
                             <button onclick="buscarCep()" class="w-full bg-slate-200 text-slate-700 py-2 px-4 rounded-md hover:bg-slate-300 font-semibold text-sm">Buscar Endereço</button>
                         </div>
@@ -162,7 +164,6 @@
                             <input type="text" id="cadastro-bairro" placeholder="Preenchido automaticamente" class="mt-1 block w-full px-3 py-2 bg-slate-100 border border-slate-300 rounded-md text-sm" required readonly>
                         </div>
                     </div>
-                    
                     <h3 class="text-lg font-semibold text-slate-700 border-b pb-2 pt-4">Segurança</h3>
                     <div>
                         <label for="cadastro-senha" class="block text-sm font-medium text-slate-600">Senha</label>
@@ -187,12 +188,12 @@
         </section>
 
         <!-- ====================================================================== -->
-        <!-- MELHORIA: TELA DE RECUPERAR SENHA                                      -->
+        <!-- TELA DE RECUPERAR SENHA                                                -->
         <!-- ====================================================================== -->
         <section id="tela-recuperar-senha" class="tela w-full max-w-sm mx-auto flex-col items-center justify-center">
             <header class="text-center mb-8">
                 <h1 class="text-3xl font-bold text-slate-700">Recuperar Senha</h1>
-                <p class="text-slate-500 mt-2">Digite seu CPF/CNPJ para receber as instruções de recuperação.</p>
+                <p class="text-slate-500 mt-2">Digite seu CPF/CNPJ para receber as instruções.</p>
             </header>
             <main class="w-full bg-white p-8 rounded-xl shadow-lg space-y-4">
                 <div>
@@ -215,20 +216,72 @@
                     <h1 id="saudacao-usuario" class="text-xl font-bold text-slate-700">Olá!</h1>
                     <p class="text-sm text-slate-500">O que você precisa fazer hoje?</p>
                 </div>
-                <button onclick="efetuarLogout()" class="text-sm text-slate-500 hover:text-emerald-600">Sair</button>
+                <button onclick="efetuarLogout()" class="text-sm text-slate-500 hover:text-emerald-600 font-semibold">Sair</button>
             </header>
-            <main class="w-full grid grid-cols-1 md:grid-cols-2 gap-6">
+            <main class="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div onclick="mostrarTela('tela-formulario')" class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg cursor-pointer transition-shadow text-center">
                     <div class="text-4xl text-emerald-500 mb-3">🌳</div>
                     <h2 class="text-lg font-bold text-slate-700">Nova Solicitação</h2>
-                    <p class="text-sm text-slate-500">Peça uma nova poda, supressão ou fiscalização de um serviço.</p>
+                    <p class="text-sm text-slate-500">Peça uma poda, supressão ou fiscalização de um serviço.</p>
                 </div>
                 <div onclick="mostrarTela('tela-lista-solicitacoes')" class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg cursor-pointer transition-shadow text-center">
                     <div class="text-4xl text-emerald-500 mb-3">📋</div>
                     <h2 class="text-lg font-bold text-slate-700">Minhas Solicitações</h2>
-                    <p class="text-sm text-slate-500">Acompanhe o andamento dos seus pedidos e veja o histórico.</p>
+                    <p class="text-sm text-slate-500">Acompanhe o andamento dos seus pedidos.</p>
+                </div>
+                <!-- NOVO: Card para a tela "Meus Dados" -->
+                <div onclick="mostrarTela('tela-meus-dados')" class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg cursor-pointer transition-shadow text-center md:col-span-2 lg:col-span-1">
+                    <div class="text-4xl text-emerald-500 mb-3">👤</div>
+                    <h2 class="text-lg font-bold text-slate-700">Meus Dados</h2>
+                    <p class="text-sm text-slate-500">Visualize e edite suas informações pessoais e de endereço.</p>
                 </div>
             </main>
+        </section>
+        
+        <!-- ====================================================================== -->
+        <!-- NOVO: TELA DE MEUS DADOS (PERFIL DO USUÁRIO)                           -->
+        <!-- ====================================================================== -->
+        <section id="tela-meus-dados" class="tela w-full max-w-2xl mx-auto flex-col">
+             <header class="w-full flex items-center mb-6 justify-between">
+                <div class="flex items-center">
+                    <button onclick="mostrarTela('tela-principal')" class="text-slate-500 hover:text-emerald-600 mr-4">← Voltar</button>
+                    <h1 class="text-2xl font-bold text-slate-700">Meus Dados</h1>
+                </div>
+                <button id="botao-editar-dados" onclick="habilitarEdicaoDados()" class="bg-slate-200 text-slate-700 py-2 px-4 rounded-md hover:bg-slate-300 font-semibold text-sm">Editar</button>
+                <button id="botao-salvar-dados" onclick="salvarDadosPessoais()" class="bg-emerald-600 text-white py-2 px-4 rounded-md hover:bg-emerald-700 font-semibold text-sm hidden">Salvar</button>
+             </header>
+             <main class="w-full bg-white p-8 rounded-xl shadow-lg space-y-4">
+                <fieldset id="fieldset-dados-pessoais" disabled>
+                    <h3 class="text-lg font-semibold text-slate-700 border-b pb-2">Dados Pessoais</h3>
+                    <div>
+                        <label for="perfil-nome" class="block text-sm font-medium text-slate-600">Nome Completo</label>
+                        <input type="text" id="perfil-nome" class="mt-1 block w-full px-3 py-2 bg-slate-100 border border-slate-300 rounded-md text-sm">
+                    </div>
+                    <div>
+                        <label for="perfil-cpf" class="block text-sm font-medium text-slate-600">CPF / CNPJ</label>
+                        <input type="text" id="perfil-cpf" class="mt-1 block w-full px-3 py-2 bg-slate-100 border border-slate-300 rounded-md text-sm">
+                    </div>
+                    <h3 class="text-lg font-semibold text-slate-700 border-b pb-2 pt-4">Endereço</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="md:col-span-1">
+                            <label for="perfil-cep" class="block text-sm font-medium text-slate-600">CEP</label>
+                            <input type="text" id="perfil-cep" class="mt-1 block w-full px-3 py-2 bg-slate-100 border border-slate-300 rounded-md text-sm">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="perfil-logradouro" class="block text-sm font-medium text-slate-600">Logradouro</label>
+                            <input type="text" id="perfil-logradouro" class="mt-1 block w-full px-3 py-2 bg-slate-100 border border-slate-300 rounded-md text-sm">
+                        </div>
+                        <div>
+                            <label for="perfil-numero" class="block text-sm font-medium text-slate-600">Número</label>
+                            <input type="text" id="perfil-numero" class="mt-1 block w-full px-3 py-2 bg-slate-100 border border-slate-300 rounded-md text-sm">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="perfil-bairro" class="block text-sm font-medium text-slate-600">Bairro</label>
+                            <input type="text" id="perfil-bairro" class="mt-1 block w-full px-3 py-2 bg-slate-100 border border-slate-300 rounded-md text-sm">
+                        </div>
+                    </div>
+                </fieldset>
+             </main>
         </section>
 
         <!-- ====================================================================== -->
@@ -251,22 +304,10 @@
                 <div>
                     <h3 class="text-lg font-semibold text-slate-700 border-b pb-2 mb-4">Endereço do Serviço</h3>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                         <div class="md:col-span-1">
-                            <label class="block text-sm font-medium text-slate-600">CEP</label>
-                            <input type="text" id="formulario-cep" class="mt-1 block w-full px-3 py-2 bg-slate-100 border rounded-md text-sm" readonly>
-                        </div>
-                        <div class="md:col-span-2">
-                            <label class="block text-sm font-medium text-slate-600">Logradouro</label>
-                            <input type="text" id="formulario-logradouro" class="mt-1 block w-full px-3 py-2 bg-slate-100 border rounded-md text-sm" readonly>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-slate-600">Número</label>
-                            <input type="text" id="formulario-numero" class="mt-1 block w-full px-3 py-2 bg-slate-100 border rounded-md text-sm" readonly>
-                        </div>
-                         <div class="md:col-span-2">
-                            <label class="block text-sm font-medium text-slate-600">Bairro</label>
-                            <input type="text" id="formulario-bairro" class="mt-1 block w-full px-3 py-2 bg-slate-100 border rounded-md text-sm" readonly>
-                        </div>
+                         <div class="md:col-span-1"><label class="block text-sm font-medium text-slate-600">CEP</label><input type="text" id="formulario-cep" class="mt-1 block w-full px-3 py-2 bg-slate-100 border rounded-md text-sm" readonly></div>
+                        <div class="md:col-span-2"><label class="block text-sm font-medium text-slate-600">Logradouro</label><input type="text" id="formulario-logradouro" class="mt-1 block w-full px-3 py-2 bg-slate-100 border rounded-md text-sm" readonly></div>
+                        <div><label class="block text-sm font-medium text-slate-600">Número</label><input type="text" id="formulario-numero" class="mt-1 block w-full px-3 py-2 bg-slate-100 border rounded-md text-sm" readonly></div>
+                         <div class="md:col-span-2"><label class="block text-sm font-medium text-slate-600">Bairro</label><input type="text" id="formulario-bairro" class="mt-1 block w-full px-3 py-2 bg-slate-100 border rounded-md text-sm" readonly></div>
                     </div>
                 </div>
                  <div>
@@ -280,12 +321,10 @@
                             <div class="text-4xl text-slate-400">📷</div>
                             <div class="flex text-sm text-slate-600">
                                 <label for="upload-arquivo" class="relative cursor-pointer bg-white rounded-md font-medium text-emerald-600 hover:text-emerald-500">
-                                    <span>Carregar um arquivo</span>
-                                    <input id="upload-arquivo" type="file" class="sr-only" multiple>
+                                    <span>Carregar um arquivo</span><input id="upload-arquivo" type="file" class="sr-only" multiple>
                                 </label>
                                 <p class="pl-1">ou arraste e solte</p>
-                            </div>
-                            <p class="text-xs text-slate-500">PNG, JPG, GIF até 10MB</p>
+                            </div><p class="text-xs text-slate-500">PNG, JPG, GIF até 10MB</p>
                         </div>
                     </div>
                     <div id="lista-arquivos-upload" class="mt-2 text-sm text-slate-600"></div>
@@ -302,12 +341,11 @@
                 <button onclick="mostrarTela('tela-principal')" class="text-slate-500 hover:text-emerald-600 mr-4">← Voltar</button>
                 <h1 class="text-2xl font-bold text-slate-700">Minhas Solicitações</h1>
             </header>
-            <!-- MELHORIA: Botões de filtro -->
-            <div class="w-full flex justify-center space-x-2 mb-4">
-                <button onclick="filtrarSolicitacoes('Todos')" class="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-full hover:bg-slate-100">Todos</button>
-                <button onclick="filtrarSolicitacoes('Em Análise')" class="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-full hover:bg-slate-100">Em Análise</button>
-                <button onclick="filtrarSolicitacoes('Aprovado')" class="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-full hover:bg-slate-100">Aprovados</button>
-                <button onclick="filtrarSolicitacoes('Recusado')" class="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-full hover:bg-slate-100">Recusados</button>
+            <div id="filtros-container" class="w-full flex justify-center space-x-2 mb-4">
+                <button onclick="filtrarSolicitacoes('Todos', this)" class="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-full hover:bg-slate-100">Todos</button>
+                <button onclick="filtrarSolicitacoes('Em Análise', this)" class="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-full hover:bg-slate-100">Em Análise</button>
+                <button onclick="filtrarSolicitacoes('Aprovado', this)" class="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-full hover:bg-slate-100">Aprovados</button>
+                <button onclick="filtrarSolicitacoes('Recusado', this)" class="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-full hover:bg-slate-100">Recusados</button>
             </div>
             <main id="container-solicitacoes" class="w-full bg-white p-4 rounded-lg shadow-md space-y-4">
                 <!-- Conteúdo gerado dinamicamente -->
@@ -315,7 +353,7 @@
         </section>
         
         <!-- ====================================================================== -->
-        <!-- TELA DE DETALHES DA SOLICITAÇÃO                                        -->
+        <!-- TELA DE DETALHES DA SOLICITAÇÃO (AGORA COM LINHA DO TEMPO)             -->
         <!-- ====================================================================== -->
         <section id="tela-detalhe-solicitacao" class="tela w-full max-w-2xl mx-auto flex-col">
             <header class="w-full flex items-center mb-6">
@@ -323,18 +361,18 @@
                 <h1 class="text-2xl font-bold text-slate-700">Detalhe da Solicitação</h1>
             </header>
             <main id="container-detalhe-solicitacao" class="w-full bg-white p-6 rounded-lg shadow-md">
-                <!-- Conteúdo gerado dinamicamente -->
+                <!-- Conteúdo da linha do tempo gerado dinamicamente -->
             </main>
         </section>
 
     </div>
 
-    <!-- MELHORIA: Elemento para a notificação (toast) -->
+    <!-- Elemento para a notificação (toast) -->
     <div id="notificacao" class="notificacao-toast"></div>
 
     <script>
         // ====================================================================== //
-        // LÓGICA DO APLICATIVO (JAVASCRIPT)                                      //
+        // LÓGICA DO APLICATIVO (JAVASCRIPT) - VERSÃO 2                         //
         // ====================================================================== //
 
         const telas = document.querySelectorAll('.tela');
@@ -346,41 +384,64 @@
         let usuarioLogado = null; 
         let idReanaliseAtual = null;
 
+        // NOVO: Estrutura de dados com linha do tempo (histórico)
         const solicitacoesFicticias = [
-            { id: '2025-001', type: 'Poda de Árvore', address: 'Rua das Palmeiras, 123', status: 'Aprovado', date: '25/09/2025', justification: 'Galhos muito baixos...', feedback: 'Serviço agendado...' },
-            { id: '2025-002', type: 'Supressão (Corte)', address: 'Av. Brasil, 789', status: 'Em Análise', date: '28/09/2025', justification: 'Árvore com risco de queda...', feedback: 'Aguardando vistoria...' },
-            { id: '2025-003', type: 'Fiscalização', address: 'Praça Central, S/N', status: 'Recusado', date: '15/09/2025', justification: 'Poda excessiva...', feedback: 'Solicitação indeferida...' },
+            { 
+                id: '2025-001', type: 'Poda de Árvore', address: 'Rua das Palmeiras, 123', status: 'Aprovado',
+                historico: [
+                    { data: '28/09/2025', status: 'Aprovado', descricao: 'Serviço agendado para 05/10/2025 com a equipe credenciada. O prestador de serviço entrará em contato.' },
+                    { data: '26/09/2025', status: 'Em Análise', descricao: 'Vistoria técnica realizada. Aguardando parecer final do departamento.' },
+                    { data: '25/09/2025', status: 'Criado', descricao: 'Solicitação criada. Justificativa: Galhos muito baixos, atrapalhando a passagem de pedestres na calçada.' },
+                ]
+            },
+            { 
+                id: '2025-002', type: 'Supressão (Corte)', address: 'Av. Brasil, 789', status: 'Em Análise',
+                historico: [
+                    { data: '28/09/2025', status: 'Em Análise', descricao: 'Aguardando vistoria técnica do fiscal ambiental. Prazo de 5 dias úteis.' },
+                    { data: '28/09/2025', status: 'Criado', descricao: 'Solicitação criada. Justificativa: Árvore apresenta apodrecimento na base e risco iminente de queda sobre a residência.' },
+                ]
+            },
+            { 
+                id: '2025-003', type: 'Fiscalização', address: 'Praça Central, S/N', status: 'Recusado',
+                historico: [
+                    { data: '20/09/2025', status: 'Recusado', descricao: 'Após análise das fotos e vistoria, foi constatado que a poda seguiu as normas técnicas municipais. Solicitação indeferida.' },
+                    { data: '16/09/2025', status: 'Em Análise', descricao: 'Fiscal em rota para vistoria do local.' },
+                    { data: '15/09/2025', status: 'Criado', descricao: 'Solicitação criada. Justificativa: A poda realizada pelo prestador parece ter sido excessiva e danificou a estrutura da árvore.' },
+                ]
+            },
         ];
         
-        /**
-         * Função central para controlar a navegação entre as telas.
-         * @param {string} idDaTela - O ID da tela que deve ser exibida.
-         */
         function mostrarTela(idDaTela) {
             telas.forEach(tela => tela.classList.remove('tela-ativa'));
             const telaAtiva = document.getElementById(idDaTela);
             if (telaAtiva) telaAtiva.classList.add('tela-ativa');
+
             if (idDaTela === 'tela-lista-solicitacoes') renderizarListaSolicitacoes();
             if (idDaTela === 'tela-formulario') preencherFormularioComDadosDoUsuario();
+            if (idDaTela === 'tela-meus-dados') preencherDadosDoPerfil();
         }
 
-        /**
-         * MELHORIA: Exibe uma notificação "toast" na tela.
-         * @param {string} mensagem - O texto a ser exibido.
-         * @param {string} tipo - 'sucesso' ou 'erro' para definir a cor.
-         */
         function mostrarNotificacao(mensagem, tipo = 'sucesso') {
             notificacaoToast.textContent = mensagem;
             notificacaoToast.className = `notificacao-toast ${tipo} mostrar`;
-            setTimeout(() => {
-                notificacaoToast.classList.remove('mostrar');
-            }, 3000); // A notificação some após 3 segundos
+            setTimeout(() => { notificacaoToast.classList.remove('mostrar'); }, 3000);
         }
         
         function efetuarLogin() {
             usuarioLogado = { nome: "Cidadão Teste", cpf: "123.456.789-00", cep: "15015-300", logradouro: "Rua XV de Novembro", numero: "3000", bairro: "Centro" };
             document.getElementById('saudacao-usuario').textContent = `Olá, ${usuarioLogado.nome}!`;
             mostrarTela('tela-principal');
+        }
+
+        // NOVO: Função para simular login com Gov.br
+        function loginGovBr() {
+            mostrarNotificacao('Autenticando com Gov.br...', 'info');
+            setTimeout(() => {
+                usuarioLogado = { nome: "Cidadão Gov.br", cpf: "987.654.321-00", cep: "15061-000", logradouro: "Avenida Bady Bassitt", numero: "5000", bairro: "Boa Vista" };
+                document.getElementById('saudacao-usuario').textContent = `Olá, ${usuarioLogado.nome}!`;
+                mostrarTela('tela-principal');
+                mostrarNotificacao('Login com Gov.br realizado com sucesso!');
+            }, 1500);
         }
 
         function efetuarLogout() {
@@ -398,19 +459,15 @@
             const senha = document.getElementById('cadastro-senha').value;
             const confirmacaoSenha = document.getElementById('cadastro-senha-confirmacao').value;
 
-            if (!nome || !cpf || !cep || !logradouro || !numero || !bairro || !senha) {
-                return mostrarNotificacao('Por favor, preencha todos os campos.', 'erro');
-            }
-            if (senha !== confirmacaoSenha) {
-                return mostrarNotificacao('As senhas não coincidem.', 'erro');
-            }
+            if (!nome || !cpf || !cep || !logradouro || !numero || !bairro || !senha) return mostrarNotificacao('Por favor, preencha todos os campos.', 'erro');
+            if (senha !== confirmacaoSenha) return mostrarNotificacao('As senhas não coincidem.', 'erro');
+
             usuarioLogado = { nome, cpf, cep, logradouro, numero, bairro };
             mostrarNotificacao(`Conta para ${nome} criada com sucesso!`);
             document.getElementById('saudacao-usuario').textContent = `Olá, ${usuarioLogado.nome}!`;
             mostrarTela('tela-principal');
         }
 
-        /** MELHORIA: Simula a recuperação de senha. */
         function recuperarSenha() {
             const cpf = document.getElementById('cpf-recuperacao').value;
             if (!cpf) return mostrarNotificacao('Digite seu CPF ou CNPJ.', 'erro');
@@ -418,30 +475,23 @@
             mostrarTela('tela-login');
         }
         
-        /** MELHORIA: Simula uma busca de CEP para preencher o endereço. */
         function buscarCep() {
             const cep = document.getElementById('cadastro-cep').value;
             if (!cep) return mostrarNotificacao('Digite um CEP para buscar.', 'erro');
             
-            mostrarNotificacao('Buscando endereço...');
-            // Simula um tempo de espera (delay) de uma chamada de API
+            mostrarNotificacao('Buscando endereço...', 'info');
             setTimeout(() => {
                 document.getElementById('cadastro-logradouro').value = 'Rua das Flores (Simulado)';
                 document.getElementById('cadastro-bairro').value = 'Jardim dos Testes (Simulado)';
                 mostrarNotificacao('Endereço encontrado!', 'sucesso');
-            }, 1500);
+            }, 1000);
         }
 
         function alternarVisibilidadeSenha(idDoInput, idDoIcone) {
             const campoSenha = document.getElementById(idDoInput);
             const icone = document.getElementById(idDoIcone);
-            if (campoSenha.type === 'password') {
-                campoSenha.type = 'text';
-                icone.textContent = '🚫'; 
-            } else {
-                campoSenha.type = 'password';
-                icone.textContent = '👁️'; 
-            }
+            campoSenha.type = (campoSenha.type === 'password') ? 'text' : 'password';
+            icone.textContent = (campoSenha.type === 'password') ? '👁️' : '🚫';
         }
         
         function atualizarListaArquivos(inputElement, containerId) {
@@ -449,11 +499,8 @@
             container.innerHTML = '';
             if (inputElement.files.length > 0) {
                 let nomesArquivos = '<strong>Arquivos selecionados:</strong><ul class="list-disc pl-5 mt-1">';
-                Array.from(inputElement.files).forEach(file => {
-                    nomesArquivos += `<li>${file.name}</li>`;
-                });
-                nomesArquivos += '</ul>';
-                container.innerHTML = nomesArquivos;
+                Array.from(inputElement.files).forEach(file => { nomesArquivos += `<li>${file.name}</li>`; });
+                container.innerHTML = nomesArquivos + '</ul>';
             }
         }
 
@@ -484,621 +531,33 @@
             const solicitacao = solicitacoesFicticias.find(s => s.id === idReanaliseAtual);
             if (solicitacao) {
                 solicitacao.status = 'Em Análise';
-                solicitacao.feedback = 'Pedido de reanálise recebido.';
-                solicitacao.justification += `\n\n[REANÁLISE]: ${novaJustificativa}`;
-            }
-            mostrarNotificacao('Pedido de reanálise enviado.');
-            mostrarTela('tela-lista-solicitacoes');
-        }
-        
-        /**
-         * MELHORIA: Filtra as solicitações por status.
-         * @param {string} status - O status para filtrar ('Todos', 'Em Análise', etc.).
-         */
-        function filtrarSolicitacoes(status) {
-            renderizarListaSolicitacoes(status);
-        }
-
-        /**
-         * Renderiza a lista de solicitações, agora com um filtro opcional.
-         * @param {string} filtroStatus - O status para filtrar. Se for 'Todos', mostra todas.
-         */
-        function renderizarListaSolicitacoes(filtroStatus = 'Todos') {
-            containerSolicitacoes.innerHTML = '';
-
-            const solicitacoesFiltradas = (filtroStatus === 'Todos')
-                ? solicitacoesFicticias
-                : solicitacoesFicticias.filter(s => s.status === filtroStatus);
-
-            if (solicitacoesFiltradas.length === 0) {
-                containerSolicitacoes.innerHTML = `<p class="text-center text-slate-500 py-8">Nenhuma solicitação encontrada para este filtro.</p>`;
-                return;
-            }
-            solicitacoesFiltradas.forEach(solicitacao => {
-                const classeStatus = solicitacao.status.toLowerCase().replace(' ', '-').replace('á', 'a');
-                const elementoSolicitacao = document.createElement('div');
-                elementoSolicitacao.className = 'flex flex-col md:flex-row justify-between items-start md:items-center p-4 border rounded-lg hover:bg-slate-50 cursor-pointer';
-                elementoSolicitacao.onclick = () => mostrarDetalheSolicitacao(solicitacao.id);
-                elementoSolicitacao.innerHTML = `
-                    <div class="mb-2 md:mb-0">
-                        <p class="font-bold text-slate-700">${solicitacao.type} <span class="text-sm font-normal text-slate-500">#${solicitacao.id}</span></p>
-                        <p class="text-sm text-slate-600">${solicitacao.address}</p>
-                        <p class="text-xs text-slate-400">Solicitado em: ${solicitacao.date}</p>
-                    </div>
-                    <div><span class="etiqueta-status status-${classeStatus}">${solicitacao.status}</span></div>`;
-                containerSolicitacoes.appendChild(elementoSolicitacao);
-            });
-        }
-        
-        function mostrarDetalheSolicitacao(idSolicitacao) {
-            const solicitacao = solicitacoesFicticias.find(s => s.id === idSolicitacao);
-            if (!solicitacao) return;
-            
-            idReanaliseAtual = idSolicitacao;
-            const classeStatus = solicitacao.status.toLowerCase().replace(' ', '-').replace('á', 'a');
-            
-            let htmlDetalhes = `<div class="space-y-4">...</div>`; // Conteúdo omitido para brevidade, mas está no código
-            htmlDetalhes = `
-                <div class="space-y-4">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <h2 class="text-xl font-bold text-slate-800">${solicitacao.type}</h2>
-                            <p class="text-sm text-slate-500">Protocolo: #${solicitacao.id}</p>
-                        </div>
-                        <span class="etiqueta-status status-${classeStatus}">${solicitacao.status}</span>
-                    </div>
-                    <div class="border-t pt-4"> <h3 class="font-semibold text-slate-700">Endereço:</h3> <p class="text-slate-600">${solicitacao.address}</p> </div>
-                    <div class="border-t pt-4"> <h3 class="font-semibold text-slate-700">Data da Solicitação:</h3> <p class="text-slate-600">${solicitacao.date}</p> </div>
-                    <div class="border-t pt-4"> <h3 class="font-semibold text-slate-700">Justificativa Enviada:</h3> <p class="text-slate-600 bg-slate-50 p-3 rounded-md whitespace-pre-wrap">${solicitacao.justification}</p> </div>
-                    <div class="border-t pt-4"> <h3 class="font-semibold text-slate-700">Retorno da Prefeitura:</h3> <p class="text-slate-600 bg-emerald-50 p-3 rounded-md text-emerald-800">${solicitacao.feedback}</p> </div>
-                </div>
-            `;
-
-
-            if (solicitacao.status === 'Recusado') {
-                htmlDetalhes += `
-                    <div class="border-t mt-6 pt-6 border-dashed border-red-300">
-                        <h3 class="text-lg font-bold text-red-700 mb-4">Solicitar Reanálise</h3>
-                        <div class="space-y-4">
-                             <div>
-                                <label for="reanalise-justificativa" class="block text-sm font-medium text-slate-600">Nova Justificativa</label>
-                                <textarea id="reanalise-justificativa" rows="4" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm" placeholder="Apresente novos argumentos..."></textarea>
-                             </div>
-                             <div>
-                                <label class="block text-sm font-medium text-slate-600">Anexar Novas Fotos</label>
-                                <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-slate-300 border-dashed rounded-md">
-                                    <div class="space-y-1 text-center">
-                                        <div class="text-4xl text-slate-400">📷</div>
-                                        <div class="flex text-sm text-slate-600">
-                                            <label for="reanalise-upload-arquivo" class="relative cursor-pointer bg-white rounded-md font-medium text-emerald-600 hover:text-emerald-500">
-                                                <span>Carregar arquivos</span>
-                                                <input id="reanalise-upload-arquivo" type="file" class="sr-only" multiple>
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div id="lista-arquivos-reanalise" class="mt-2 text-sm text-slate-600"></div>
-                             </div>
-                             <button onclick="solicitarReanalise()" class="w-full bg-orange-500 text-white py-2.5 px-4 rounded-md hover:bg-orange-600 font-semibold">Enviar Pedido de Reanálise</button>
-                        </div>
-                    </div>
-                `;
-            }
-
-            containerDetalheSolicitacao.innerHTML = htmlDetalhes;
-            mostrarTela('tela-detalhe-solicitacao');
-            const inputUploadReanalise = document.getElementById('reanalise-upload-arquivo');
-            if(inputUploadReanalise) {
-                inputUploadReanalise.addEventListener('change', () => atualizarListaArquivos(inputUploadReanalise, 'lista-arquivos-reanalise'));
-            }
-        }<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>App Fiscalização de Poda de Árvore</title>
-    
-    <!-- Inclusão do framework de CSS Tailwind para estilização rápida e responsiva -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- 
-      PALETA DE CORES ESCOLHIDA: Harmonia Calma (Cinza claro, Cinza escuro, Verde primário, Azul de destaque)
-      Este esquema de cores foi escolhido para criar uma interface limpa, profissional e agradável.
-    -->
-    
-    <!-- 
-      PLANO DA ESTRUTURA DO APLICATIVO:
-      A aplicação é uma SPA (Single-Page Application) que simula múltiplas telas usando lógica de JavaScript para mostrar/esconder seções de HTML.
-      As telas são: Login, Cadastro, Recuperar Senha, Painel Principal, Formulário de Nova Solicitação, Lista de Solicitações e Detalhe da Solicitação.
-      Essa estrutura foi escolhida para simplificar drasticamente o fluxo confuso do site atual da prefeitura, oferecendo ao usuário ações claras e diretas,
-      e um formulário otimizado, atendendo a todos os requisitos da documentação inicial (login, solicitação, anexo de fotos e feedback de status).
-    -->
-    
-    <!-- 
-      ESCOLHAS DE VISUALIZAÇÃO E CONTEÚDO:
-      - Processo de Login/Cadastro: Apresentado através de formulários limpos para facilitar o acesso e o registro de novos usuários.
-      - Tipos de Solicitação (Poda/Fiscalização): Organizados em um painel com botões grandes e claros para simplificar a escolha da ação pelo usuário.
-      - Formulário de Solicitação: Estruturado em HTML para coletar os dados necessários de forma intuitiva, incluindo um campo para upload de arquivos.
-      - Status das Solicitações: Exibido em uma lista dinâmica com etiquetas coloridas e filtros para informar e organizar os dados para o usuário.
-      Todos os ícones são implementados com caracteres Unicode para manter a performance e a simplicidade, sem usar imagens ou SVG.
-    -->
-    
-    <!-- CONFIRMAÇÃO: Nenhum gráfico SVG ou a biblioteca Mermaid.js foram utilizados. -->
-
-    <style>
-        /* Estilos personalizados para controlar a exibição das "telas" do aplicativo */
-        .tela { display: none; }
-        .tela-ativa { display: flex; }
-
-        /* Estilo base para as etiquetas (badges) de status das solicitações */
-        .etiqueta-status {
-            padding: 0.25rem 0.75rem;
-            border-radius: 9999px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-
-        /* Cores específicas para cada status */
-        .status-em-analise { background-color: #f59e0b; color: white; }
-        .status-aprovado { background-color: #10b981; color: white; }
-        .status-recusado { background-color: #ef4444; color: white; }
-
-        /* MELHORIA: Estilos para o sistema de notificação (toast) */
-        .notificacao-toast {
-            position: fixed;
-            bottom: -100px; /* Começa fora da tela */
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 1rem 1.5rem;
-            border-radius: 0.5rem;
-            color: white;
-            font-weight: 500;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            transition: bottom 0.5s ease-in-out; /* Animação suave */
-            z-index: 100;
-        }
-        .notificacao-toast.sucesso { background-color: #22c55e; }
-        .notificacao-toast.erro { background-color: #ef4444; }
-        .notificacao-toast.mostrar { bottom: 20px; } /* Posição final na tela */
-    </style>
-</head>
-<body class="bg-gradient-to-br from-emerald-50 to-slate-100 font-sans text-slate-800">
-
-    <!-- Container principal que envolve toda a aplicação -->
-    <div id="aplicativo-container" class="min-h-screen flex flex-col items-center p-4 py-8 sm:justify-center">
-
-        <!-- ====================================================================== -->
-        <!-- TELA DE LOGIN                                                          -->
-        <!-- ====================================================================== -->
-        <section id="tela-login" class="tela w-full max-w-sm mx-auto flex-col items-center justify-center">
-            <header class="text-center mb-8">
-                <img src="https://www.riopreto.sp.gov.br/wp-content/uploads/2022/01/brasao-colorido-e-texto-prefeitura-SJRP-2021.png" alt="Logo Prefeitura de São José do Rio Preto" class="h-28 mx-auto mb-4">
-                <h1 class="text-3xl font-bold text-slate-700">Bem-vindo!</h1>
-                <p class="text-slate-500">Acesse sua conta para continuar</p>
-            </header>
-            <main class="w-full bg-white p-8 rounded-xl shadow-lg">
-                <div class="space-y-4">
-                    <div>
-                        <label for="cpf-login" class="block text-sm font-medium text-slate-600">CPF / CNPJ</label>
-                        <input type="text" id="cpf-login" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm" placeholder="000.000.000-00">
-                    </div>
-                    <div>
-                        <div class="flex justify-between">
-                            <label for="senha-login" class="block text-sm font-medium text-slate-600">Senha</label>
-                            <!-- MELHORIA: Adicionado link para a tela de recuperar senha -->
-                            <a href="#" onclick="event.preventDefault(); mostrarTela('tela-recuperar-senha')" class="text-sm font-medium text-emerald-600 hover:underline">Esqueci a senha</a>
-                        </div>
-                        <div class="relative mt-1">
-                            <input type="password" id="senha-login" class="block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm pr-10" placeholder="••••••••">
-                            <button type="button" onclick="alternarVisibilidadeSenha('senha-login', 'icone-senha-login')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-500">
-                                <span id="icone-senha-login">👁️</span>
-                            </button>
-                        </div>
-                    </div>
-                    <button onclick="efetuarLogin()" class="w-full bg-emerald-600 text-white py-2.5 px-4 rounded-md hover:bg-emerald-700 font-semibold">Acessar</button>
-                    <div class="relative flex py-3 items-center">
-                        <div class="flex-grow border-t border-slate-200"></div><span class="flex-shrink mx-4 text-slate-400 text-sm">OU</span><div class="flex-grow border-t border-slate-200"></div>
-                    </div>
-                    <button onclick="efetuarLogin()" class="w-full bg-blue-600 text-white py-2.5 px-4 rounded-md hover:bg-blue-700 font-bold">Entrar com gov.br</button>
-                </div>
-            </main>
-            <footer class="text-center mt-6">
-                <p class="text-sm text-slate-600">Não tem uma conta? <a href="#" onclick="event.preventDefault(); mostrarTela('tela-cadastro')" class="font-medium text-emerald-600 hover:underline">Cadastre-se aqui.</a></p>
-            </footer>
-        </section>
-
-        <!-- ====================================================================== -->
-        <!-- TELA DE CADASTRO                                                       -->
-        <!-- ====================================================================== -->
-        <section id="tela-cadastro" class="tela w-full max-w-lg mx-auto flex-col items-center justify-center">
-            <header class="text-center mb-8">
-                <img src="https://www.riopreto.sp.gov.br/wp-content/uploads/2022/01/brasao-colorido-e-texto-prefeitura-SJRP-2021.png" alt="Logo Prefeitura de São José do Rio Preto" class="h-24 mx-auto mb-4">
-                <h1 class="text-3xl font-bold text-slate-700">Criar Conta</h1>
-                <p class="text-slate-500">Preencha os dados para se cadastrar</p>
-            </header>
-            <main class="w-full bg-white p-8 rounded-xl shadow-lg">
-                <div class="space-y-4">
-                    <h3 class="text-lg font-semibold text-slate-700 border-b pb-2">Dados Pessoais</h3>
-                    <div>
-                        <label for="cadastro-nome" class="block text-sm font-medium text-slate-600">Nome Completo</label>
-                        <input type="text" id="cadastro-nome" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm" placeholder="Seu nome completo" required>
-                    </div>
-                    <div>
-                        <label for="cadastro-cpf" class="block text-sm font-medium text-slate-600">CPF / CNPJ</label>
-                        <input type="text" id="cadastro-cpf" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm" placeholder="000.000.000-00" required>
-                    </div>
-
-                    <h3 class="text-lg font-semibold text-slate-700 border-b pb-2 pt-4">Endereço</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-                        <div class="md:col-span-1">
-                            <label for="cadastro-cep" class="block text-sm font-medium text-slate-600">CEP</label>
-                            <input type="text" id="cadastro-cep" placeholder="15000-000" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm" required>
-                        </div>
-                        <!-- MELHORIA: Botão para simular a busca de CEP -->
-                        <div class="md:col-span-2">
-                            <button onclick="buscarCep()" class="w-full bg-slate-200 text-slate-700 py-2 px-4 rounded-md hover:bg-slate-300 font-semibold text-sm">Buscar Endereço</button>
-                        </div>
-                        <div class="md:col-span-3">
-                            <label for="cadastro-logradouro" class="block text-sm font-medium text-slate-600">Logradouro</label>
-                            <input type="text" id="cadastro-logradouro" placeholder="Preenchido automaticamente" class="mt-1 block w-full px-3 py-2 bg-slate-100 border border-slate-300 rounded-md text-sm" required readonly>
-                        </div>
-                        <div>
-                            <label for="cadastro-numero" class="block text-sm font-medium text-slate-600">Número</label>
-                            <input type="text" id="cadastro-numero" placeholder="123" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm" required>
-                        </div>
-                        <div class="md:col-span-2">
-                            <label for="cadastro-bairro" class="block text-sm font-medium text-slate-600">Bairro</label>
-                            <input type="text" id="cadastro-bairro" placeholder="Preenchido automaticamente" class="mt-1 block w-full px-3 py-2 bg-slate-100 border border-slate-300 rounded-md text-sm" required readonly>
-                        </div>
-                    </div>
-                    
-                    <h3 class="text-lg font-semibold text-slate-700 border-b pb-2 pt-4">Segurança</h3>
-                    <div>
-                        <label for="cadastro-senha" class="block text-sm font-medium text-slate-600">Senha</label>
-                        <div class="relative mt-1">
-                            <input type="password" id="cadastro-senha" class="block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm pr-10" placeholder="Crie uma senha forte" required>
-                             <button type="button" onclick="alternarVisibilidadeSenha('cadastro-senha', 'icone-senha-cadastro')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-500"><span id="icone-senha-cadastro">👁️</span></button>
-                        </div>
-                    </div>
-                    <div>
-                        <label for="cadastro-senha-confirmacao" class="block text-sm font-medium text-slate-600">Confirmar Senha</label>
-                        <div class="relative mt-1">
-                           <input type="password" id="cadastro-senha-confirmacao" class="block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm pr-10" placeholder="Repita a senha" required>
-                            <button type="button" onclick="alternarVisibilidadeSenha('cadastro-senha-confirmacao', 'icone-senha-confirmacao')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-500"><span id="icone-senha-confirmacao">👁️</span></button>
-                        </div>
-                    </div>
-                    <button onclick="cadastrarUsuario()" class="w-full bg-emerald-600 text-white py-2.5 px-4 rounded-md hover:bg-emerald-700 font-semibold mt-6">Criar Conta</button>
-                </div>
-            </main>
-            <footer class="text-center mt-6">
-                <p class="text-sm text-slate-600">Já tem uma conta? <a href="#" onclick="event.preventDefault(); mostrarTela('tela-login')" class="font-medium text-emerald-600 hover:underline">Acesse aqui.</a></p>
-            </footer>
-        </section>
-
-        <!-- ====================================================================== -->
-        <!-- MELHORIA: TELA DE RECUPERAR SENHA                                      -->
-        <!-- ====================================================================== -->
-        <section id="tela-recuperar-senha" class="tela w-full max-w-sm mx-auto flex-col items-center justify-center">
-            <header class="text-center mb-8">
-                <h1 class="text-3xl font-bold text-slate-700">Recuperar Senha</h1>
-                <p class="text-slate-500 mt-2">Digite seu CPF/CNPJ para receber as instruções de recuperação.</p>
-            </header>
-            <main class="w-full bg-white p-8 rounded-xl shadow-lg space-y-4">
-                <div>
-                    <label for="cpf-recuperacao" class="block text-sm font-medium text-slate-600">CPF / CNPJ</label>
-                    <input type="text" id="cpf-recuperacao" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm" placeholder="000.000.000-00">
-                </div>
-                <button onclick="recuperarSenha()" class="w-full bg-emerald-600 text-white py-2.5 px-4 rounded-md hover:bg-emerald-700 font-semibold">Enviar</button>
-            </main>
-            <footer class="text-center mt-6">
-                <p class="text-sm text-slate-600">Lembrou a senha? <a href="#" onclick="event.preventDefault(); mostrarTela('tela-login')" class="font-medium text-emerald-600 hover:underline">Voltar para o login.</a></p>
-            </footer>
-        </section>
-
-        <!-- ====================================================================== -->
-        <!-- TELA PRINCIPAL (PAINEL / DASHBOARD)                                    -->
-        <!-- ====================================================================== -->
-        <section id="tela-principal" class="tela w-full max-w-4xl mx-auto flex-col">
-            <header class="w-full flex justify-between items-center p-4 bg-white shadow-md rounded-lg mb-6">
-                <div>
-                    <h1 id="saudacao-usuario" class="text-xl font-bold text-slate-700">Olá!</h1>
-                    <p class="text-sm text-slate-500">O que você precisa fazer hoje?</p>
-                </div>
-                <button onclick="efetuarLogout()" class="text-sm text-slate-500 hover:text-emerald-600">Sair</button>
-            </header>
-            <main class="w-full grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div onclick="mostrarTela('tela-formulario')" class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg cursor-pointer transition-shadow text-center">
-                    <div class="text-4xl text-emerald-500 mb-3">🌳</div>
-                    <h2 class="text-lg font-bold text-slate-700">Nova Solicitação</h2>
-                    <p class="text-sm text-slate-500">Peça uma nova poda, supressão ou fiscalização de um serviço.</p>
-                </div>
-                <div onclick="mostrarTela('tela-lista-solicitacoes')" class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg cursor-pointer transition-shadow text-center">
-                    <div class="text-4xl text-emerald-500 mb-3">📋</div>
-                    <h2 class="text-lg font-bold text-slate-700">Minhas Solicitações</h2>
-                    <p class="text-sm text-slate-500">Acompanhe o andamento dos seus pedidos e veja o histórico.</p>
-                </div>
-            </main>
-        </section>
-
-        <!-- ====================================================================== -->
-        <!-- TELA DE FORMULÁRIO DE NOVA SOLICITAÇÃO                                 -->
-        <!-- ====================================================================== -->
-        <section id="tela-formulario" class="tela w-full max-w-2xl mx-auto flex-col">
-             <header class="w-full flex items-center mb-6">
-                <button onclick="mostrarTela('tela-principal')" class="text-slate-500 hover:text-emerald-600 mr-4">← Voltar</button>
-                <h1 class="text-2xl font-bold text-slate-700">Nova Solicitação</h1>
-            </header>
-            <main class="w-full bg-white p-6 rounded-lg shadow-md space-y-6">
-                <div>
-                    <h3 class="text-lg font-semibold text-slate-700 border-b pb-2 mb-4">Tipo de Serviço</h3>
-                    <select id="formulario-tipo-servico" class="block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm">
-                        <option>Solicitação de Poda de Árvore</option>
-                        <option>Solicitação de Supressão (Corte)</option>
-                        <option>Solicitação de Fiscalização de Serviço Realizado</option>
-                    </select>
-                </div>
-                <div>
-                    <h3 class="text-lg font-semibold text-slate-700 border-b pb-2 mb-4">Endereço do Serviço</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                         <div class="md:col-span-1">
-                            <label class="block text-sm font-medium text-slate-600">CEP</label>
-                            <input type="text" id="formulario-cep" class="mt-1 block w-full px-3 py-2 bg-slate-100 border rounded-md text-sm" readonly>
-                        </div>
-                        <div class="md:col-span-2">
-                            <label class="block text-sm font-medium text-slate-600">Logradouro</label>
-                            <input type="text" id="formulario-logradouro" class="mt-1 block w-full px-3 py-2 bg-slate-100 border rounded-md text-sm" readonly>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-slate-600">Número</label>
-                            <input type="text" id="formulario-numero" class="mt-1 block w-full px-3 py-2 bg-slate-100 border rounded-md text-sm" readonly>
-                        </div>
-                         <div class="md:col-span-2">
-                            <label class="block text-sm font-medium text-slate-600">Bairro</label>
-                            <input type="text" id="formulario-bairro" class="mt-1 block w-full px-3 py-2 bg-slate-100 border rounded-md text-sm" readonly>
-                        </div>
-                    </div>
-                </div>
-                 <div>
-                    <h3 class="text-lg font-semibold text-slate-700 border-b pb-2 mb-4">Justificativa</h3>
-                    <textarea id="formulario-justificativa" rows="4" class="block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm" placeholder="Descreva o motivo da sua solicitação..." required></textarea>
-                </div>
-                 <div>
-                    <h3 class="text-lg font-semibold text-slate-700 border-b pb-2 mb-4">Fotos</h3>
-                    <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-slate-300 border-dashed rounded-md">
-                        <div class="space-y-1 text-center">
-                            <div class="text-4xl text-slate-400">📷</div>
-                            <div class="flex text-sm text-slate-600">
-                                <label for="upload-arquivo" class="relative cursor-pointer bg-white rounded-md font-medium text-emerald-600 hover:text-emerald-500">
-                                    <span>Carregar um arquivo</span>
-                                    <input id="upload-arquivo" type="file" class="sr-only" multiple>
-                                </label>
-                                <p class="pl-1">ou arraste e solte</p>
-                            </div>
-                            <p class="text-xs text-slate-500">PNG, JPG, GIF até 10MB</p>
-                        </div>
-                    </div>
-                    <div id="lista-arquivos-upload" class="mt-2 text-sm text-slate-600"></div>
-                </div>
-                <button onclick="enviarSolicitacao()" class="w-full bg-emerald-600 text-white py-3 px-4 rounded-md hover:bg-emerald-700 font-semibold">Enviar Requerimento</button>
-            </main>
-        </section>
-
-        <!-- ====================================================================== -->
-        <!-- TELA DE LISTA DE SOLICITAÇÕES                                          -->
-        <!-- ====================================================================== -->
-        <section id="tela-lista-solicitacoes" class="tela w-full max-w-4xl mx-auto flex-col">
-            <header class="w-full flex items-center mb-6">
-                <button onclick="mostrarTela('tela-principal')" class="text-slate-500 hover:text-emerald-600 mr-4">← Voltar</button>
-                <h1 class="text-2xl font-bold text-slate-700">Minhas Solicitações</h1>
-            </header>
-            <!-- MELHORIA: Botões de filtro -->
-            <div class="w-full flex justify-center space-x-2 mb-4">
-                <button onclick="filtrarSolicitacoes('Todos')" class="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-full hover:bg-slate-100">Todos</button>
-                <button onclick="filtrarSolicitacoes('Em Análise')" class="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-full hover:bg-slate-100">Em Análise</button>
-                <button onclick="filtrarSolicitacoes('Aprovado')" class="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-full hover:bg-slate-100">Aprovados</button>
-                <button onclick="filtrarSolicitacoes('Recusado')" class="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-full hover:bg-slate-100">Recusados</button>
-            </div>
-            <main id="container-solicitacoes" class="w-full bg-white p-4 rounded-lg shadow-md space-y-4">
-                <!-- Conteúdo gerado dinamicamente -->
-            </main>
-        </section>
-        
-        <!-- ====================================================================== -->
-        <!-- TELA DE DETALHES DA SOLICITAÇÃO                                        -->
-        <!-- ====================================================================== -->
-        <section id="tela-detalhe-solicitacao" class="tela w-full max-w-2xl mx-auto flex-col">
-            <header class="w-full flex items-center mb-6">
-                <button onclick="mostrarTela('tela-lista-solicitacoes')" class="text-slate-500 hover:text-emerald-600 mr-4">← Voltar</button>
-                <h1 class="text-2xl font-bold text-slate-700">Detalhe da Solicitação</h1>
-            </header>
-            <main id="container-detalhe-solicitacao" class="w-full bg-white p-6 rounded-lg shadow-md">
-                <!-- Conteúdo gerado dinamicamente -->
-            </main>
-        </section>
-
-    </div>
-
-    <!-- MELHORIA: Elemento para a notificação (toast) -->
-    <div id="notificacao" class="notificacao-toast"></div>
-
-    <script>
-        // ====================================================================== //
-        // LÓGICA DO APLICATIVO (JAVASCRIPT)                                      //
-        // ====================================================================== //
-
-        const telas = document.querySelectorAll('.tela');
-        const containerSolicitacoes = document.getElementById('container-solicitacoes');
-        const containerDetalheSolicitacao = document.getElementById('container-detalhe-solicitacao');
-        const inputUploadPrincipal = document.getElementById('upload-arquivo');
-        const notificacaoToast = document.getElementById('notificacao');
-        
-        let usuarioLogado = null; 
-        let idReanaliseAtual = null;
-
-        const solicitacoesFicticias = [
-            { id: '2025-001', type: 'Poda de Árvore', address: 'Rua das Palmeiras, 123', status: 'Aprovado', date: '25/09/2025', justification: 'Galhos muito baixos...', feedback: 'Serviço agendado...' },
-            { id: '2025-002', type: 'Supressão (Corte)', address: 'Av. Brasil, 789', status: 'Em Análise', date: '28/09/2025', justification: 'Árvore com risco de queda...', feedback: 'Aguardando vistoria...' },
-            { id: '2025-003', type: 'Fiscalização', address: 'Praça Central, S/N', status: 'Recusado', date: '15/09/2025', justification: 'Poda excessiva...', feedback: 'Solicitação indeferida...' },
-        ];
-        
-        /**
-         * Função central para controlar a navegação entre as telas.
-         * @param {string} idDaTela - O ID da tela que deve ser exibida.
-         */
-        function mostrarTela(idDaTela) {
-            telas.forEach(tela => tela.classList.remove('tela-ativa'));
-            const telaAtiva = document.getElementById(idDaTela);
-            if (telaAtiva) telaAtiva.classList.add('tela-ativa');
-            if (idDaTela === 'tela-lista-solicitacoes') renderizarListaSolicitacoes();
-            if (idDaTela === 'tela-formulario') preencherFormularioComDadosDoUsuario();
-        }
-
-        /**
-         * MELHORIA: Exibe uma notificação "toast" na tela.
-         * @param {string} mensagem - O texto a ser exibido.
-         * @param {string} tipo - 'sucesso' ou 'erro' para definir a cor.
-         */
-        function mostrarNotificacao(mensagem, tipo = 'sucesso') {
-            notificacaoToast.textContent = mensagem;
-            notificacaoToast.className = `notificacao-toast ${tipo} mostrar`;
-            setTimeout(() => {
-                notificacaoToast.classList.remove('mostrar');
-            }, 3000); // A notificação some após 3 segundos
-        }
-        
-        function efetuarLogin() {
-            usuarioLogado = { nome: "Cidadão Teste", cpf: "123.456.789-00", cep: "15015-300", logradouro: "Rua XV de Novembro", numero: "3000", bairro: "Centro" };
-            document.getElementById('saudacao-usuario').textContent = `Olá, ${usuarioLogado.nome}!`;
-            mostrarTela('tela-principal');
-        }
-
-        function efetuarLogout() {
-            usuarioLogado = null;
-            mostrarTela('tela-login');
-        }
-        
-        function cadastrarUsuario() {
-            const nome = document.getElementById('cadastro-nome').value;
-            const cpf = document.getElementById('cadastro-cpf').value;
-            const cep = document.getElementById('cadastro-cep').value;
-            const logradouro = document.getElementById('cadastro-logradouro').value;
-            const numero = document.getElementById('cadastro-numero').value;
-            const bairro = document.getElementById('cadastro-bairro').value;
-            const senha = document.getElementById('cadastro-senha').value;
-            const confirmacaoSenha = document.getElementById('cadastro-senha-confirmacao').value;
-
-            if (!nome || !cpf || !cep || !logradouro || !numero || !bairro || !senha) {
-                return mostrarNotificacao('Por favor, preencha todos os campos.', 'erro');
-            }
-            if (senha !== confirmacaoSenha) {
-                return mostrarNotificacao('As senhas não coincidem.', 'erro');
-            }
-            usuarioLogado = { nome, cpf, cep, logradouro, numero, bairro };
-            mostrarNotificacao(`Conta para ${nome} criada com sucesso!`);
-            document.getElementById('saudacao-usuario').textContent = `Olá, ${usuarioLogado.nome}!`;
-            mostrarTela('tela-principal');
-        }
-
-        /** MELHORIA: Simula a recuperação de senha. */
-        function recuperarSenha() {
-            const cpf = document.getElementById('cpf-recuperacao').value;
-            if (!cpf) return mostrarNotificacao('Digite seu CPF ou CNPJ.', 'erro');
-            mostrarNotificacao('Se a conta existir, um email de recuperação foi enviado.');
-            mostrarTela('tela-login');
-        }
-        
-        /** MELHORIA: Simula uma busca de CEP para preencher o endereço. */
-        function buscarCep() {
-            const cep = document.getElementById('cadastro-cep').value;
-            if (!cep) return mostrarNotificacao('Digite um CEP para buscar.', 'erro');
-            
-            mostrarNotificacao('Buscando endereço...');
-            // Simula um tempo de espera (delay) de uma chamada de API
-            setTimeout(() => {
-                document.getElementById('cadastro-logradouro').value = 'Rua das Flores (Simulado)';
-                document.getElementById('cadastro-bairro').value = 'Jardim dos Testes (Simulado)';
-                mostrarNotificacao('Endereço encontrado!', 'sucesso');
-            }, 1500);
-        }
-
-        function alternarVisibilidadeSenha(idDoInput, idDoIcone) {
-            const campoSenha = document.getElementById(idDoInput);
-            const icone = document.getElementById(idDoIcone);
-            if (campoSenha.type === 'password') {
-                campoSenha.type = 'text';
-                icone.textContent = '🚫'; 
-            } else {
-                campoSenha.type = 'password';
-                icone.textContent = '👁️'; 
-            }
-        }
-        
-        function atualizarListaArquivos(inputElement, containerId) {
-            const container = document.getElementById(containerId);
-            container.innerHTML = '';
-            if (inputElement.files.length > 0) {
-                let nomesArquivos = '<strong>Arquivos selecionados:</strong><ul class="list-disc pl-5 mt-1">';
-                Array.from(inputElement.files).forEach(file => {
-                    nomesArquivos += `<li>${file.name}</li>`;
+                // NOVO: Adiciona um novo evento ao histórico
+                const hoje = new Date().toLocaleDateString('pt-BR');
+                solicitacao.historico.unshift({
+                    data: hoje, status: 'Em Análise',
+                    descricao: `Pedido de reanálise recebido. Nova justificativa: ${novaJustificativa}`
                 });
-                nomesArquivos += '</ul>';
-                container.innerHTML = nomesArquivos;
-            }
-        }
-
-        function preencherFormularioComDadosDoUsuario() {
-            if (usuarioLogado) {
-                document.getElementById('formulario-cep').value = usuarioLogado.cep;
-                document.getElementById('formulario-logradouro').value = usuarioLogado.logradouro;
-                document.getElementById('formulario-numero').value = usuarioLogado.numero;
-                document.getElementById('formulario-bairro').value = usuarioLogado.bairro;
-            }
-        }
-
-        function enviarSolicitacao() {
-            const justificativa = document.getElementById('formulario-justificativa').value;
-            if (!justificativa) return mostrarNotificacao('Preencha a justificativa.', 'erro');
-            
-            mostrarNotificacao('Solicitação enviada com sucesso!');
-            document.getElementById('formulario-justificativa').value = '';
-            document.getElementById('upload-arquivo').value = '';
-            document.getElementById('lista-arquivos-upload').innerHTML = '';
-            mostrarTela('tela-principal');
-        }
-        
-        function solicitarReanalise() {
-             const novaJustificativa = document.getElementById('reanalise-justificativa').value;
-             if (!novaJustificativa) return mostrarNotificacao('Preencha a nova justificativa.', 'erro');
-            
-            const solicitacao = solicitacoesFicticias.find(s => s.id === idReanaliseAtual);
-            if (solicitacao) {
-                solicitacao.status = 'Em Análise';
-                solicitacao.feedback = 'Pedido de reanálise recebido.';
-                solicitacao.justification += `\n\n[REANÁLISE]: ${novaJustificativa}`;
             }
             mostrarNotificacao('Pedido de reanálise enviado.');
             mostrarTela('tela-lista-solicitacoes');
         }
-        
-        /**
-         * MELHORIA: Filtra as solicitações por status.
-         * @param {string} status - O status para filtrar ('Todos', 'Em Análise', etc.).
-         */
-        function filtrarSolicitacoes(status) {
+
+        function filtrarSolicitacoes(status, botaoClicado) {
+            // Lógica para destacar o botão ativo
+            const botoesFiltro = document.querySelectorAll('#filtros-container button');
+            botoesFiltro.forEach(btn => {
+                btn.classList.remove('bg-emerald-600', 'text-white');
+                btn.classList.add('bg-white', 'text-slate-700');
+            });
+            botaoClicado.classList.add('bg-emerald-600', 'text-white');
+            botaoClicado.classList.remove('bg-white', 'text-slate-700');
+            
             renderizarListaSolicitacoes(status);
         }
 
-        /**
-         * Renderiza a lista de solicitações, agora com um filtro opcional.
-         * @param {string} filtroStatus - O status para filtrar. Se for 'Todos', mostra todas.
-         */
         function renderizarListaSolicitacoes(filtroStatus = 'Todos') {
             containerSolicitacoes.innerHTML = '';
-
-            const solicitacoesFiltradas = (filtroStatus === 'Todos')
-                ? solicitacoesFicticias
-                : solicitacoesFicticias.filter(s => s.status === filtroStatus);
+            const solicitacoesFiltradas = (filtroStatus === 'Todos') ? solicitacoesFicticias : solicitacoesFicticias.filter(s => s.status === filtroStatus);
 
             if (solicitacoesFiltradas.length === 0) {
                 containerSolicitacoes.innerHTML = `<p class="text-center text-slate-500 py-8">Nenhuma solicitação encontrada para este filtro.</p>`;
@@ -1113,37 +572,44 @@
                     <div class="mb-2 md:mb-0">
                         <p class="font-bold text-slate-700">${solicitacao.type} <span class="text-sm font-normal text-slate-500">#${solicitacao.id}</span></p>
                         <p class="text-sm text-slate-600">${solicitacao.address}</p>
-                        <p class="text-xs text-slate-400">Solicitado em: ${solicitacao.date}</p>
+                        <p class="text-xs text-slate-400">Última atualização: ${solicitacao.historico[0].data}</p>
                     </div>
                     <div><span class="etiqueta-status status-${classeStatus}">${solicitacao.status}</span></div>`;
                 containerSolicitacoes.appendChild(elementoSolicitacao);
             });
         }
         
+        // NOVO: Função para renderizar a linha do tempo
         function mostrarDetalheSolicitacao(idSolicitacao) {
             const solicitacao = solicitacoesFicticias.find(s => s.id === idSolicitacao);
             if (!solicitacao) return;
             
             idReanaliseAtual = idSolicitacao;
-            const classeStatus = solicitacao.status.toLowerCase().replace(' ', '-').replace('á', 'a');
             
-            let htmlDetalhes = `<div class="space-y-4">...</div>`; // Conteúdo omitido para brevidade, mas está no código
-            htmlDetalhes = `
-                <div class="space-y-4">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <h2 class="text-xl font-bold text-slate-800">${solicitacao.type}</h2>
-                            <p class="text-sm text-slate-500">Protocolo: #${solicitacao.id}</p>
-                        </div>
-                        <span class="etiqueta-status status-${classeStatus}">${solicitacao.status}</span>
-                    </div>
-                    <div class="border-t pt-4"> <h3 class="font-semibold text-slate-700">Endereço:</h3> <p class="text-slate-600">${solicitacao.address}</p> </div>
-                    <div class="border-t pt-4"> <h3 class="font-semibold text-slate-700">Data da Solicitação:</h3> <p class="text-slate-600">${solicitacao.date}</p> </div>
-                    <div class="border-t pt-4"> <h3 class="font-semibold text-slate-700">Justificativa Enviada:</h3> <p class="text-slate-600 bg-slate-50 p-3 rounded-md whitespace-pre-wrap">${solicitacao.justification}</p> </div>
-                    <div class="border-t pt-4"> <h3 class="font-semibold text-slate-700">Retorno da Prefeitura:</h3> <p class="text-slate-600 bg-emerald-50 p-3 rounded-md text-emerald-800">${solicitacao.feedback}</p> </div>
+            let htmlDetalhes = `
+                <div class="mb-6">
+                    <h2 class="text-xl font-bold text-slate-800">${solicitacao.type}</h2>
+                    <p class="text-sm text-slate-500">Protocolo: #${solicitacao.id}</p>
+                    <p class="text-sm text-slate-500">Endereço: ${solicitacao.address}</p>
                 </div>
+                <div class="timeline">
             `;
+            
+            solicitacao.historico.forEach(evento => {
+                const classeStatus = evento.status.toLowerCase().replace(' ', '-').replace('á', 'a');
+                htmlDetalhes += `
+                    <div class="timeline-item">
+                        <div class="timeline-dot status-${classeStatus}"></div>
+                        <div class="pl-4">
+                            <p class="text-sm text-slate-500">${evento.data}</p>
+                            <p class="font-bold text-slate-700">${evento.status}</p>
+                            <p class="text-slate-600 text-sm">${evento.descricao}</p>
+                        </div>
+                    </div>
+                `;
+            });
 
+            htmlDetalhes += `</div>`;
 
             if (solicitacao.status === 'Recusado') {
                 htmlDetalhes += `
@@ -1161,8 +627,7 @@
                                         <div class="text-4xl text-slate-400">📷</div>
                                         <div class="flex text-sm text-slate-600">
                                             <label for="reanalise-upload-arquivo" class="relative cursor-pointer bg-white rounded-md font-medium text-emerald-600 hover:text-emerald-500">
-                                                <span>Carregar arquivos</span>
-                                                <input id="reanalise-upload-arquivo" type="file" class="sr-only" multiple>
+                                                <span>Carregar arquivos</span><input id="reanalise-upload-arquivo" type="file" class="sr-only" multiple>
                                             </label>
                                         </div>
                                     </div>
@@ -1182,446 +647,55 @@
                 inputUploadReanalise.addEventListener('change', () => atualizarListaArquivos(inputUploadReanalise, 'lista-arquivos-reanalise'));
             }
         }
+        
+        // --- NOVO: Funções para a tela "Meus Dados" ---
+        function preencherDadosDoPerfil() {
+            if(usuarioLogado) {
+                document.getElementById('perfil-nome').value = usuarioLogado.nome;
+                document.getElementById('perfil-cpf').value = usuarioLogado.cpf;
+                document.getElementById('perfil-cep').value = usuarioLogado.cep;
+                document.getElementById('perfil-logradouro').value = usuarioLogado.logradouro;
+                document.getElementById('perfil-numero').value = usuarioLogado.numero;
+                document.getElementById('perfil-bairro').value = usuarioLogado.bairro;
+            }
+        }
+
+        function habilitarEdicaoDados() {
+            document.getElementById('fieldset-dados-pessoais').disabled = false;
+            // Altera a cor dos inputs para indicar que são editáveis
+            const inputs = document.querySelectorAll('#fieldset-dados-pessoais input');
+            inputs.forEach(input => input.classList.replace('bg-slate-100', 'bg-white'));
+            // Troca os botões
+            document.getElementById('botao-editar-dados').classList.add('hidden');
+            document.getElementById('botao-salvar-dados').classList.remove('hidden');
+        }
+
+        function salvarDadosPessoais() {
+            // Atualiza o objeto do usuário logado com os novos valores
+            usuarioLogado.nome = document.getElementById('perfil-nome').value;
+            usuarioLogado.cpf = document.getElementById('perfil-cpf').value;
+            usuarioLogado.cep = document.getElementById('perfil-cep').value;
+            usuarioLogado.logradouro = document.getElementById('perfil-logradouro').value;
+            usuarioLogado.numero = document.getElementById('perfil-numero').value;
+            usuarioLogado.bairro = document.getElementById('perfil-bairro').value;
+            
+            // Desabilita a edição novamente
+            document.getElementById('fieldset-dados-pessoais').disabled = true;
+            const inputs = document.querySelectorAll('#fieldset-dados-pessoais input');
+            inputs.forEach(input => input.classList.replace('bg-white', 'bg-slate-100'));
+            // Troca os botões de volta
+            document.getElementById('botao-salvar-dados').classList.add('hidden');
+            document.getElementById('botao-editar-dados').classList.remove('hidden');
+            
+            // Atualiza a saudação na tela principal, caso o nome tenha mudado
+            document.getElementById('saudacao-usuario').textContent = `Olá, ${usuarioLogado.nome}!`;
+
+            mostrarNotificacao('Dados salvos com sucesso!');
+        }
+
 
         inputUploadPrincipal.addEventListener('change', () => atualizarListaArquivos(inputUploadPrincipal, 'lista-arquivos-upload'));
-
-        document.addEventListener('DOMContentLoaded', () => {
-            mostrarTela('tela-login');
-        });
-    </script>
-</body>
-</html>
-
-
-
-        inputUploadPrincipal.addEventListener('change', () => atualizarListaArquivos(inputUploadPrincipal, 'lista-arquivos-upload'));
-
-        document.addEventListener('DOMContentLoaded', () => {
-            mostrarTela('tela-login');
-        });
-    </script>
-</body>
-</html>
-
-
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>App Fiscalização de Poda de Árvore</title>
-    
-    <!-- Inclusão do framework de CSS Tailwind para estilização rápida e responsiva -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- 
-      PALETA DE CORES ESCOLHIDA: Harmonia Calma (Cinza claro, Cinza escuro, Verde primário, Azul de destaque)
-      Este esquema de cores foi escolhido para criar uma interface limpa, profissional e agradável.
-    -->
-    
-    <!-- 
-      PLANO DA ESTRUTURA DO APLICATIVO:
-      A aplicação é uma SPA (Single-Page Application) que simula múltiplas telas usando lógica de JavaScript para mostrar/esconder seções de HTML.
-      As telas são: Login, Cadastro, Painel Principal, Formulário de Nova Solicitação, Lista de Solicitações e Detalhe da Solicitação.
-      Essa estrutura foi escolhida para simplificar drasticamente o fluxo confuso do site atual da prefeitura, oferecendo ao usuário ações claras e diretas,
-      e um formulário otimizado, atendendo a todos os requisitos da documentação inicial (login, solicitação, anexo de fotos e feedback de status).
-    -->
-    
-    <!-- 
-      ESCOLHAS DE VISUALIZAÇÃO E CONTEÚDO:
-      - Processo de Login/Cadastro: Apresentado através de formulários limpos para facilitar o acesso e o registro de novos usuários.
-      - Tipos de Solicitação (Poda/Fiscalização): Organizados em um painel com botões grandes e claros para simplificar a escolha da ação pelo usuário.
-      - Formulário de Solicitação: Estruturado em HTML para coletar os dados necessários de forma intuitiva, incluindo um campo para upload de arquivos.
-      - Status das Solicitações: Exibido em uma lista dinâmica com etiquetas coloridas para informar o usuário de forma rápida e visual. O clique em um item leva aos detalhes.
-      Todos os ícones são implementados com caracteres Unicode para manter a performance e a simplicidade, sem usar imagens ou SVG.
-    -->
-    
-    <!-- CONFIRMAÇÃO: Nenhum gráfico SVG ou a biblioteca Mermaid.js foram utilizados. -->
-
-    <style>
-        /* Estilos personalizados para controlar a exibição das "telas" do aplicativo */
-
-        /* Por padrão, todas as seções que funcionam como telas ficam escondidas */
-        .tela { 
-            display: none; 
-        }
-
-        /* A classe 'tela-ativa' torna uma seção visível, usando flexbox para alinhar seu conteúdo */
-        .tela-ativa { 
-            display: flex; 
-        }
-
-        /* Estilo base para as etiquetas (badges) de status das solicitações */
-        .etiqueta-status {
-            padding: 0.25rem 0.75rem; /* Espaçamento interno */
-            border-radius: 9999px;    /* Bordas totalmente arredondadas */
-            font-size: 0.75rem;       /* Tamanho da fonte pequeno */
-            font-weight: 600;         /* Fonte em negrito */
-            text-transform: uppercase; /* Texto em maiúsculas */
-        }
-
-        /* Cores específicas para cada status */
-        .status-em-analise { background-color: #f59e0b; color: white; } /* Laranja para "Em Análise" */
-        .status-aprovado { background-color: #10b981; color: white; }    /* Verde para "Aprovado" */
-        .status-recusado { background-color: #ef4444; color: white; }     /* Vermelho para "Recusado" */
-    </style>
-</head>
-<body class="bg-gradient-to-br from-emerald-50 to-slate-100 font-sans text-slate-800">
-
-    <!-- Container principal que envolve toda a aplicação -->
-    <div id="aplicativo-container" class="min-h-screen flex flex-col items-center p-4 py-8 sm:justify-center">
-
-        <!-- ====================================================================== -->
-        <!-- TELA DE LOGIN                                                          -->
-        <!-- ====================================================================== -->
-        <section id="tela-login" class="tela w-full max-w-sm mx-auto flex-col items-center justify-center">
-            <!-- Cabeçalho com logo e texto de boas-vindas -->
-            <header class="text-center mb-8">
-                <img src="https://www.riopreto.sp.gov.br/wp-content/uploads/2022/01/brasao-colorido-e-texto-prefeitura-SJRP-2021.png" alt="Logo Prefeitura de São José do Rio Preto" class="h-28 mx-auto mb-4">
-                <h1 class="text-3xl font-bold text-slate-700">Bem-vindo!</h1>
-                <p class="text-slate-500">Acesse sua conta para continuar</p>
-            </header>
-            <!-- Conteúdo principal do formulário de login -->
-            <main class="w-full bg-white p-8 rounded-xl shadow-lg">
-                <div class="space-y-4">
-                    <!-- Campo de CPF / CNPJ -->
-                    <div>
-                        <label for="cpf-login" class="block text-sm font-medium text-slate-600">CPF / CNPJ</label>
-                        <input type="text" id="cpf-login" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" placeholder="000.000.000-00">
-                    </div>
-                    <!-- Campo de Senha -->
-                    <div>
-                        <label for="senha-login" class="block text-sm font-medium text-slate-600">Senha</label>
-                        <input type="password" id="senha-login" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" placeholder="••••••••">
-                    </div>
-                    <!-- Botão de Acessar -->
-                    <button onclick="efetuarLogin()" class="w-full bg-emerald-600 text-white py-2.5 px-4 rounded-md hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors font-semibold">Acessar</button>
-                    <!-- Divisor "OU" -->
-                    <div class="relative flex py-3 items-center">
-                        <div class="flex-grow border-t border-slate-200"></div>
-                        <span class="flex-shrink mx-4 text-slate-400 text-sm">OU</span>
-                        <div class="flex-grow border-t border-slate-200"></div>
-                    </div>
-                    <!-- Botão de Login com Gov.br -->
-                    <button onclick="efetuarLogin()" class="w-full bg-blue-600 text-white py-2.5 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors font-bold">Entrar com gov.br</button>
-                </div>
-            </main>
-            <!-- Rodapé com link para a tela de cadastro -->
-            <footer class="text-center mt-6">
-                <p class="text-sm text-slate-600">Não tem uma conta? <a href="#" onclick="event.preventDefault(); mostrarTela('tela-cadastro')" class="font-medium text-emerald-600 hover:underline">Cadastre-se aqui.</a></p>
-            </footer>
-        </section>
-
-        <!-- ====================================================================== -->
-        <!-- TELA DE CADASTRO                                                       -->
-        <!-- ====================================================================== -->
-        <section id="tela-cadastro" class="tela w-full max-w-sm mx-auto flex-col items-center justify-center">
-            <!-- Cabeçalho da tela de cadastro -->
-            <header class="text-center mb-8">
-                <img src="https://www.riopreto.sp.gov.br/wp-content/uploads/2022/01/brasao-colorido-e-texto-prefeitura-SJRP-2021.png" alt="Logo Prefeitura de São José do Rio Preto" class="h-24 mx-auto mb-4">
-                <h1 class="text-3xl font-bold text-slate-700">Criar Conta</h1>
-                <p class="text-slate-500">Preencha os dados para se cadastrar</p>
-            </header>
-            <!-- Conteúdo principal do formulário de cadastro -->
-            <main class="w-full bg-white p-8 rounded-xl shadow-lg">
-                <div class="space-y-4">
-                    <!-- Campo de Nome Completo -->
-                    <div>
-                        <label for="cadastro-nome" class="block text-sm font-medium text-slate-600">Nome Completo</label>
-                        <input type="text" id="cadastro-nome" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" placeholder="Seu nome completo">
-                    </div>
-                    <!-- Campo de CPF / CNPJ -->
-                    <div>
-                        <label for="cadastro-cpf" class="block text-sm font-medium text-slate-600">CPF / CNPJ</label>
-                        <input type="text" id="cadastro-cpf" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" placeholder="000.000.000-00">
-                    </div>
-                    <!-- Campo de Senha -->
-                    <div>
-                        <label for="cadastro-senha" class="block text-sm font-medium text-slate-600">Senha</label>
-                        <input type="password" id="cadastro-senha" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" placeholder="Crie uma senha forte">
-                    </div>
-                    <!-- Campo de Confirmação de Senha -->
-                    <div>
-                        <label for="cadastro-senha-confirmacao" class="block text-sm font-medium text-slate-600">Confirmar Senha</label>
-                        <input type="password" id="cadastro-senha-confirmacao" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" placeholder="Repita a senha">
-                    </div>
-                    <!-- Botão de Criar Conta -->
-                    <button onclick="cadastrarUsuario()" class="w-full bg-emerald-600 text-white py-2.5 px-4 rounded-md hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors font-semibold">Criar Conta</button>
-                </div>
-            </main>
-            <!-- Rodapé com link de volta para a tela de login -->
-            <footer class="text-center mt-6">
-                <p class="text-sm text-slate-600">Já tem uma conta? <a href="#" onclick="event.preventDefault(); mostrarTela('tela-login')" class="font-medium text-emerald-600 hover:underline">Acesse aqui.</a></p>
-            </footer>
-        </section>
-
-        <!-- ====================================================================== -->
-        <!-- TELA PRINCIPAL (PAINEL / DASHBOARD)                                    -->
-        <!-- ====================================================================== -->
-        <section id="tela-principal" class="tela w-full max-w-4xl mx-auto flex-col">
-            <!-- Cabeçalho com saudação e botão de sair -->
-            <header class="w-full flex justify-between items-center p-4 bg-white shadow-md rounded-lg mb-6">
-                <div>
-                    <h1 class="text-xl font-bold text-slate-700">Olá, Cidadão!</h1>
-                    <p class="text-sm text-slate-500">O que você precisa fazer hoje?</p>
-                </div>
-                <button onclick="efetuarLogout()" class="text-sm text-slate-500 hover:text-emerald-600">Sair</button>
-            </header>
-            <!-- Opções principais do painel -->
-            <main class="w-full grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Botão para abrir o formulário de nova solicitação -->
-                <div onclick="mostrarTela('tela-formulario')" class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg cursor-pointer transition-shadow text-center">
-                    <div class="text-4xl text-emerald-500 mb-3">🌳</div>
-                    <h2 class="text-lg font-bold text-slate-700">Nova Solicitação</h2>
-                    <p class="text-sm text-slate-500">Peça uma nova poda, supressão ou fiscalização de um serviço.</p>
-                </div>
-                <!-- Botão para ver a lista de solicitações existentes -->
-                <div onclick="mostrarTela('tela-lista-solicitacoes')" class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg cursor-pointer transition-shadow text-center">
-                    <div class="text-4xl text-emerald-500 mb-3">📋</div>
-                    <h2 class="text-lg font-bold text-slate-700">Minhas Solicitações</h2>
-                    <p class="text-sm text-slate-500">Acompanhe o andamento dos seus pedidos e veja o histórico.</p>
-                </div>
-            </main>
-        </section>
-
-        <!-- ====================================================================== -->
-        <!-- TELA DE FORMULÁRIO DE NOVA SOLICITAÇÃO                                 -->
-        <!-- ====================================================================== -->
-        <section id="tela-formulario" class="tela w-full max-w-2xl mx-auto flex-col">
-             <header class="w-full flex items-center mb-6">
-                <button onclick="mostrarTela('tela-principal')" class="text-slate-500 hover:text-emerald-600 mr-4">← Voltar</button>
-                <h1 class="text-2xl font-bold text-slate-700">Nova Solicitação</h1>
-            </header>
-            <main class="w-full bg-white p-6 rounded-lg shadow-md space-y-6">
-                <!-- Seção para escolher o tipo de serviço -->
-                <div>
-                    <h3 class="text-lg font-semibold text-slate-700 border-b pb-2 mb-4">Tipo de Serviço</h3>
-                    <select class="block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500">
-                        <option>Solicitação de Poda de Árvore</option>
-                        <option>Solicitação de Supressão (Corte)</option>
-                        <option>Solicitação de Fiscalização de Serviço Realizado</option>
-                    </select>
-                </div>
-                <!-- Seção para preencher o endereço -->
-                <div>
-                    <h3 class="text-lg font-semibold text-slate-700 border-b pb-2 mb-4">Endereço do Serviço</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                         <div class="md:col-span-1">
-                            <label class="block text-sm font-medium text-slate-600">CEP</label>
-                            <input type="text" placeholder="15000-000" class="mt-1 block w-full input-style">
-                        </div>
-                        <div class="md:col-span-2">
-                            <label class="block text-sm font-medium text-slate-600">Logradouro</label>
-                            <input type="text" placeholder="Rua das Palmeiras" class="mt-1 block w-full input-style">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-slate-600">Número</label>
-                            <input type="text" placeholder="123" class="mt-1 block w-full input-style">
-                        </div>
-                         <div class="md:col-span-2">
-                            <label class="block text-sm font-medium text-slate-600">Bairro</label>
-                            <input type="text" placeholder="Centro" class="mt-1 block w-full input-style">
-                        </div>
-                    </div>
-                </div>
-                <!-- Seção para a justificativa -->
-                 <div>
-                    <h3 class="text-lg font-semibold text-slate-700 border-b pb-2 mb-4">Justificativa</h3>
-                    <textarea rows="4" class="block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" placeholder="Descreva o motivo da sua solicitação. Ex: galhos tocando a fiação elétrica, risco de queda, etc."></textarea>
-                </div>
-                <!-- Seção para anexar fotos -->
-                 <div>
-                    <h3 class="text-lg font-semibold text-slate-700 border-b pb-2 mb-4">Fotos</h3>
-                    <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-slate-300 border-dashed rounded-md">
-                        <div class="space-y-1 text-center">
-                            <div class="text-4xl text-slate-400">📷</div>
-                            <div class="flex text-sm text-slate-600">
-                                <label for="upload-arquivo" class="relative cursor-pointer bg-white rounded-md font-medium text-emerald-600 hover:text-emerald-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-emerald-500">
-                                    <span>Carregar um arquivo</span>
-                                    <input id="upload-arquivo" name="upload-arquivo" type="file" class="sr-only" multiple>
-                                </label>
-                                <p class="pl-1">ou arraste e solte</p>
-                            </div>
-                            <p class="text-xs text-slate-500">PNG, JPG, GIF até 10MB</p>
-                        </div>
-                    </div>
-                </div>
-                <!-- Botão para enviar o formulário -->
-                <button onclick="enviarSolicitacao()" class="w-full bg-emerald-600 text-white py-3 px-4 rounded-md hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors font-semibold">Enviar Requerimento</button>
-            </main>
-        </section>
-
-        <!-- ====================================================================== -->
-        <!-- TELA DE LISTA DE SOLICITAÇÕES                                          -->
-        <!-- ====================================================================== -->
-        <section id="tela-lista-solicitacoes" class="tela w-full max-w-4xl mx-auto flex-col">
-            <header class="w-full flex items-center mb-6">
-                <button onclick="mostrarTela('tela-principal')" class="text-slate-500 hover:text-emerald-600 mr-4">← Voltar</button>
-                <h1 class="text-2xl font-bold text-slate-700">Minhas Solicitações</h1>
-            </header>
-            <!-- Container onde a lista de solicitações será inserida dinamicamente pelo JavaScript -->
-            <main id="container-solicitacoes" class="w-full bg-white p-4 rounded-lg shadow-md space-y-4">
-                <!-- Conteúdo gerado dinamicamente -->
-            </main>
-        </section>
-        
-        <!-- ====================================================================== -->
-        <!-- TELA DE DETALHES DA SOLICITAÇÃO                                        -->
-        <!-- ====================================================================== -->
-        <section id="tela-detalhe-solicitacao" class="tela w-full max-w-2xl mx-auto flex-col">
-            <header class="w-full flex items-center mb-6">
-                <button onclick="mostrarTela('tela-lista-solicitacoes')" class="text-slate-500 hover:text-emerald-600 mr-4">← Voltar</button>
-                <h1 class="text-2xl font-bold text-slate-700">Detalhe da Solicitação</h1>
-            </header>
-            <!-- Container onde os detalhes da solicitação serão inseridos dinamicamente pelo JavaScript -->
-            <main id="container-detalhe-solicitacao" class="w-full bg-white p-6 rounded-lg shadow-md">
-                <!-- Conteúdo gerado dinamicamente -->
-            </main>
-        </section>
-
-    </div>
-
-    <script>
-        // LÓGICA DO APLICATIVO (JAVASCRIPT)
-
-        // Seleciona todos os elementos que funcionam como telas
-        const telas = document.querySelectorAll('.tela');
-        // Seleciona o container que vai abrigar a lista de solicitações
-        const containerSolicitacoes = document.getElementById('container-solicitacoes');
-        // Seleciona o container que vai abrigar os detalhes de uma solicitação
-        const containerDetalheSolicitacao = document.getElementById('container-detalhe-solicitacao');
-        
-        // Dados de exemplo para simular as solicitações do usuário
-        const solicitacoesFicticias = [
-            { id: '2025-001', type: 'Poda de Árvore', address: 'Rua das Palmeiras, 123', status: 'Aprovado', date: '25/09/2025', justification: 'Galhos muito baixos, atrapalhando a passagem de pedestres na calçada.', feedback: 'Serviço agendado para 05/10/2025 com a equipe credenciada. O prestador de serviço entrará em contato.' },
-            { id: '2025-002', type: 'Supressão (Corte)', address: 'Av. Brasil, 789', status: 'Em Análise', date: '28/09/2025', justification: 'Árvore apresenta apodrecimento na base e risco iminente de queda sobre a residência.', feedback: 'Aguardando vistoria técnica do fiscal ambiental. Prazo de 5 dias úteis.' },
-            { id: '2025-003', type: 'Fiscalização', address: 'Praça Central, S/N', status: 'Recusado', date: '15/09/2025', justification: 'A poda realizada pelo prestador parece ter sido excessiva e danificou a estrutura da árvore.', feedback: 'Após análise das fotos e vistoria, foi constatado que a poda seguiu as normas técnicas municipais. Solicitação indeferida.' },
-        ];
-
-        /**
-         * Função central para controlar a navegação entre as telas.
-         * @param {string} idDaTela - O ID da tela que deve ser exibida.
-         */
-        function mostrarTela(idDaTela) {
-            // Esconde todas as telas
-            telas.forEach(tela => {
-                tela.classList.remove('tela-ativa');
-                tela.classList.add('tela');
-            });
-            // Mostra a tela desejada
-            const telaAtiva = document.getElementById(idDaTela);
-            if(telaAtiva) {
-                telaAtiva.classList.add('tela-ativa');
-                telaAtiva.classList.remove('tela');
-            }
-
-            // Se a tela a ser mostrada for a lista de solicitações, renderiza a lista.
-            if (idDaTela === 'tela-lista-solicitacoes') {
-                renderizarListaSolicitacoes();
-            }
-        }
-
-        /** Simula o login do usuário e o redireciona para o painel principal. */
-        function efetuarLogin() {
-            mostrarTela('tela-principal');
-        }
-
-        /** Simula o logout do usuário e o redireciona para a tela de login. */
-        function efetuarLogout() {
-            mostrarTela('tela-login');
-        }
-        
-        /** Simula o cadastro de um novo usuário. */
-        function cadastrarUsuario() {
-            alert('Conta criada com sucesso! Você já pode acessar o sistema.');
-            mostrarTela('tela-login');
-        }
-
-        /** Simula o envio de uma nova solicitação. */
-        function enviarSolicitacao() {
-            alert('Sua solicitação foi enviada com sucesso! Você pode acompanhá-la na tela "Minhas Solicitações".');
-            mostrarTela('tela-principal');
-        }
-        
-        /** Renderiza a lista de solicitações na tela correspondente. */
-        function renderizarListaSolicitacoes() {
-            // Limpa o container antes de adicionar os novos itens
-            containerSolicitacoes.innerHTML = '';
-            
-            // Verifica se existem solicitações para exibir
-            if (solicitacoesFicticias.length === 0) {
-                containerSolicitacoes.innerHTML = `<p class="text-center text-slate-500 py-8">Nenhuma solicitação encontrada.</p>`;
-                return;
-            }
-
-            // Para cada solicitação, cria um elemento HTML e o adiciona no container
-            solicitacoesFicticias.forEach(solicitacao => {
-                // Prepara o nome da classe CSS para o status (ex: 'Em Análise' vira 'em-analise')
-                const classeStatus = solicitacao.status.toLowerCase().replace(' ', '-').replace('á', 'a');
-                
-                const elementoSolicitacao = document.createElement('div');
-                elementoSolicitacao.className = 'flex flex-col md:flex-row justify-between items-start md:items-center p-4 border rounded-lg hover:bg-slate-50 cursor-pointer';
-                elementoSolicitacao.onclick = () => mostrarDetalheSolicitacao(solicitacao.id);
-                
-                elementoSolicitacao.innerHTML = `
-                    <div class="mb-2 md:mb-0">
-                        <p class="font-bold text-slate-700">${solicitacao.type} <span class="text-sm font-normal text-slate-500">#${solicitacao.id}</span></p>
-                        <p class="text-sm text-slate-600">${solicitacao.address}</p>
-                        <p class="text-xs text-slate-400">Solicitado em: ${solicitacao.date}</p>
-                    </div>
-                    <div>
-                        <span class="etiqueta-status status-${classeStatus}">${solicitacao.status}</span>
-                    </div>
-                `;
-                containerSolicitacoes.appendChild(elementoSolicitacao);
-            });
-        }
-        
-        /**
-         * Exibe os detalhes de uma solicitação específica.
-         * @param {string} idSolicitacao - O ID da solicitação a ser detalhada.
-         */
-        function mostrarDetalheSolicitacao(idSolicitacao) {
-            // Encontra a solicitação no array de dados
-            const solicitacao = solicitacoesFicticias.find(s => s.id === idSolicitacao);
-            if (!solicitacao) return; // Se não encontrar, não faz nada
-            
-            // Prepara o nome da classe CSS para o status
-            const classeStatus = solicitacao.status.toLowerCase().replace(' ', '-').replace('á', 'a');
-            
-            // Monta o HTML com os detalhes da solicitação
-            containerDetalheSolicitacao.innerHTML = `
-                <div class="space-y-4">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <h2 class="text-xl font-bold text-slate-800">${solicitacao.type}</h2>
-                            <p class="text-sm text-slate-500">Protocolo: #${solicitacao.id}</p>
-                        </div>
-                        <span class="etiqueta-status status-${classeStatus}">${solicitacao.status}</span>
-                    </div>
-                    <div class="border-t pt-4">
-                        <h3 class="font-semibold text-slate-700">Endereço:</h3>
-                        <p class="text-slate-600">${solicitacao.address}</p>
-                    </div>
-                    <div class="border-t pt-4">
-                        <h3 class="font-semibold text-slate-700">Data da Solicitação:</h3>
-                        <p class="text-slate-600">${solicitacao.date}</p>
-                    </div>
-                    <div class="border-t pt-4">
-                        <h3 class="font-semibold text-slate-700">Justificativa Enviada:</h3>
-                        <p class="text-slate-600 bg-slate-50 p-3 rounded-md">${solicitacao.justification}</p>
-                    </div>
-                    <div class="border-t pt-4">
-                        <h3 class="font-semibold text-slate-700">Retorno da Prefeitura:</h3>
-                        <p class="text-slate-600 bg-emerald-50 p-3 rounded-md text-emerald-800">${solicitacao.feedback}</p>
-                    </div>
-                </div>
-            `;
-            // Mostra a tela de detalhes
-            mostrarTela('tela-detalhe-solicitacao');
-        }
-
-        // Evento que é disparado quando o conteúdo da página é totalmente carregado
-        document.addEventListener('DOMContentLoaded', () => {
-            // Define a tela de login como a tela inicial do aplicativo
-            mostrarTela('tela-login');
-        });
+        document.addEventListener('DOMContentLoaded', () => { mostrarTela('tela-login'); });
     </script>
 </body>
 </html>
